@@ -299,6 +299,7 @@ function LazyMedia({ messageId, mediaType, className, alt = "MMS attachment" }) 
                 controls
                 src={src}
                 className="audio-player"
+                style={{ width: '100%' }}
               />
             </div>
           )}

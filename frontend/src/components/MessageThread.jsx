@@ -581,7 +581,7 @@ function MessageThread({ conversation, startDate, endDate }) {
                   key={message.id}
                   className={`d-flex ${isSent ? 'justify-content-end' : 'justify-content-start'}`}
                 >
-                  <div style={{ maxWidth: '70%' }}>
+                  <div style={message.media_type?.startsWith('audio/') ? { width: '90%' } : { maxWidth: '70%' }}>
                     {/* Sender label for received messages in group conversations */}
                     {showSenderLabel && (
                       <div className="small text-muted mb-1 ms-2" style={{ fontSize: '0.7rem' }}>
