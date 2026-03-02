@@ -586,7 +586,15 @@ func HandleAnalytics(c echo.Context) error {
 		}
 	}
 
-	analytics, err := GetAnalytics(userDB, startDate, endDate, topN)
+	// Timezone offset in minutes from UTC (e.g. -300 for UTC-5, 330 for UTC+5:30)
+	tzOffsetMinutes := 0
+	if tzStr := c.QueryParam("tz_offset"); tzStr != "" {
+		if val, err := strconv.Atoi(tzStr); err == nil && val >= -840 && val <= 840 {
+			tzOffsetMinutes = val
+		}
+	}
+
+	analytics, err := GetAnalytics(userDB, startDate, endDate, topN, tzOffsetMinutes)
 	if err != nil {
 		slog.Error("Error getting analytics", "error", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{

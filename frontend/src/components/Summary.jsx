@@ -26,6 +26,7 @@ function Summary({ startDate, endDate }) {
       const params = {}
       if (startDate) params.start = startDate.toISOString()
       if (endDate) params.end = endDate.toISOString()
+      params.tz_offset = -new Date().getTimezoneOffset()
 
       const response = await axios.get(`${API_BASE}/analytics`, { params })
       setAnalytics(response.data)
@@ -109,6 +110,8 @@ function Summary({ startDate, endDate }) {
     ...c,
     displayName: c.contact_name || formatPhoneNumber(c.address) || c.address
   }))
+
+  const truncate = (str, max) => str.length > max ? str.slice(0, max) + '…' : str
 
   return (
     <div className="h-100 d-flex flex-column">
@@ -201,14 +204,15 @@ function Summary({ startDate, endDate }) {
               <div className="card-body">
                 {topContactsData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={Math.max(200, topContactsData.length * 36)}>
-                    <BarChart data={topContactsData} layout="vertical">
+                    <BarChart data={topContactsData} layout="vertical" margin={{ left: 0, right: 16 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis type="number" />
                       <YAxis
                         type="category"
                         dataKey="displayName"
-                        width={120}
+                        width={160}
                         tick={{ fontSize: 11 }}
+                        tickFormatter={(val) => truncate(val, 22)}
                       />
                       <Tooltip
                         formatter={(value) => [value.toLocaleString(), 'Messages']}

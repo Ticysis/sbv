@@ -1046,7 +1046,7 @@ func SearchMessages(userDB *sql.DB, query string, limit int) ([]SearchResult, er
 }
 
 // GetAnalytics retrieves analytics data for the Summary tab
-func GetAnalytics(userDB *sql.DB, startDate, endDate *time.Time, topN int) (*AnalyticsResponse, error) {
+func GetAnalytics(userDB *sql.DB, startDate, endDate *time.Time, topN int, tzOffsetMinutes int) (*AnalyticsResponse, error) {
 	analytics := &AnalyticsResponse{}
 
 	// Build date filter
@@ -1074,7 +1074,7 @@ func GetAnalytics(userDB *sql.DB, startDate, endDate *time.Time, topN int) (*Ana
 	analytics.TopContacts = topContacts
 
 	// 3. Get hourly distribution
-	hourly, err := getHourlyDistribution(userDB, dateFilter, args)
+	hourly, err := getHourlyDistribution(userDB, dateFilter, args, tzOffsetMinutes)
 	if err != nil {
 		return nil, err
 	}
@@ -1154,10 +1154,11 @@ func getTopContacts(userDB *sql.DB, dateFilter string, args []interface{}, limit
 	return contacts, nil
 }
 
-func getHourlyDistribution(userDB *sql.DB, dateFilter string, args []interface{}) ([]HourlyDistribution, error) {
+func getHourlyDistribution(userDB *sql.DB, dateFilter string, args []interface{}, tzOffsetMinutes int) ([]HourlyDistribution, error) {
+	tzModifier := fmt.Sprintf("%+d minutes", tzOffsetMinutes)
 	query := `
 		SELECT
-			CAST(strftime('%H', date, 'unixepoch', 'localtime') AS INTEGER) as hour,
+			CAST(strftime('%H', date, 'unixepoch', '` + tzModifier + `') AS INTEGER) as hour,
 			COUNT(*) as count
 		FROM messages
 		WHERE record_type IN (1, 2) ` + dateFilter + `
